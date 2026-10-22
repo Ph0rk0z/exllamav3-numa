@@ -3774,6 +3774,16 @@ void exl3_moe_cpu_forward_raw_numa(
         exl3_moe_cpu_forward_raw(handle, x, sel, wts, out, rows, topk, 2 * threads_per_node);
         return;
     }
+
+    // Batched jobs: the single pool is already bandwidth-efficient at row counts > 1, and
+    // the NUMA path's seven-phase barrier overhead costs prefill throughput
+/*
+    if (rows > 1)
+    {
+        exl3_moe_cpu_forward_raw(handle, x, sel, wts, out, rows, topk, 2 * threads_per_node);
+        return;
+    }
+*/
     std::memset(out, 0, static_cast<size_t>(m_total) * H * sizeof(float));
 
     std::lock_guard<std::mutex> lock(g_pool_mutex);
